@@ -3,7 +3,7 @@
 
 # define build environment
 BUILD_DIR=`pwd`
-TMP_DIR=$BUILD_DIR/tmp"
+TMP_DIR="$BUILD_DIR/tmp"
 GRAAL_DIR="$BUILD_DIR/graal11"
 pushd `dirname $0`
 SCRIPT_DIR=`pwd`
