@@ -35,6 +35,7 @@ download_and_open() {
 	FILE="$DOWNLOAD_DIR/`basename $URL`"
 	DEST="$2"
 	if ! test -f "$FILE" ; then 
+		echo "downloading $1"
 		pushd "$DOWNLOAD_DIR"
 		curl -O -L --insecure "$URL"
 		popd
@@ -55,6 +56,7 @@ clone_or_update() {
 	URL="$1"
 	DEST="$2"
 	if ! test -d "$DEST" ; then 
+		echo "cloning $1"
 		git clone "$URL" "$DEST"
 	else
 		pushd "$DEST"
@@ -64,7 +66,7 @@ clone_or_update() {
 }
 
 build_ant() {
-	download_and_open http://apache.mirror.gtcomm.net//ant/binaries/apache-ant-1.10.6-bin.tar.gz "$TOOL_DIR/ant"
+	download_and_open http://apache.mirror.gtcomm.net/ant/binaries/apache-ant-1.10.6-bin.tar.gz "$TOOL_DIR/ant"
 }
 
 build_autoconf() {
@@ -108,7 +110,7 @@ build_mvn() {
 	if test -d "$TOOL_DIR/apache-maven"; then
 		return
 	fi
-	download_and_open http://muug.ca/mirror/apache-dist/maven/maven-3/3.6.1/binaries/apache-maven-3.6.1-bin.tar.gz "$TOOL_DIR/apache-maven"
+	download_and_open http://muug.ca/mirror/apache-dist/maven/maven-3/3.6.2/binaries/apache-maven-3.6.2-bin.tar.gz "$TOOL_DIR/apache-maven"
 }
 
 build_mx() {
@@ -215,6 +217,16 @@ build_jtreg() {
 	download_and_open $JTREG_URL "$TOOL_DIR/jtreg"
 }
 
+junk_build_jtreg() {
+	# does not work, so just download a built jtreg for now
+	## requires Ant Mercurial, wget and a JDK 7 or 8
+	# build_ant
+	build_wget
+	cd "$TOOL_DIR"
+	clone_or_update http://hg.openjdk.java.net/code-tools/jtreg jtreg
+	cd jtreg
+	sh make/build-all.sh "$1"
+}
 
 buildtools() {
 	mkdir -p "$DOWNLOAD_DIR"
@@ -243,6 +255,7 @@ buildtools() {
 
 export PATH=$OLDPATH
 export PATH=$TOOL_DIR/ant/bin:$PATH
+export PATH=$TOOL_DIR/apache-maven/bin:$PATH
 export PATH=$TOOL_DIR/cmake/CMake.app/Contents/bin:$PATH
 export PATH=$TOOL_DIR/jtreg/bin:$PATH
 export PATH=$TOOL_DIR/mercurial:$PATH
