@@ -2,9 +2,15 @@
 
 set -e
 
+GRAAL_SOURCE_URL=https://github.com/oracle/graal.git
+
+#JDK8_JVMCI_PREBUILT_URL=https://github.com/graalvm/openjdk8-jvmci-builder/releases/download/jvmci-20.0-b02/openjdk-8u242-jvmci-20.0-b02-darwin-amd64.tar.gz
+JDK8_JVMCI_PREBUILT_URL=https://github.com/graalvm/openjdk8-jvmci-builder/releases/download/jvmci-20.0-b02/openjdk-8u242-jvmci-20.0-b02-fastdebug-darwin-amd64.tar.gz
+
+
 ## if true, then download a prebuilt jvmci JDK8
 ## if false, then build one locally
-DOWNLOAD_JCVMCI_JDK8=false
+DOWNLOAD_JCVMCI_JDK8=true
 
 # define build environment
 BUILD_DIR=`pwd`
@@ -22,7 +28,7 @@ download_jvmci_jdk8() {
 	if test -d "$TOOL_DIR/jvmci_jdk8" ; then
 		return
 	fi
-	download_and_open https://github.com/graalvm/openjdk9-jvmci-builder/releases/download/jvmci-19-b01/openjdk-8u212-jvmci-19-b01-darwin-amd64.tar.gz "$TOOL_DIR/jvmci_jdk8"
+	download_and_open $JDK8_JVMCI_PREBUILT_URL "$TOOL_DIR/jvmci_jdk8"
 }
 
 build_jdk8() {
@@ -46,13 +52,7 @@ build_jvmci_jdk8() {
 
 build_graal() {
 	cd "$GRAAL_DIR"
-	make_foo
- 	#mx --primary-suite-path compiler build
-	#mx --primary-suite-path compiler vm -XX:+PrintFlagsFinal -version
- 	#mx --primary-suite-path substratevm build
-	#mx --primary-suite-path sdk build
-	#mx --primary-suite-path vm build
-	mx --primary-suite-path substratevm native-image -classpath "$TMP_DIR" "Foo" "$TMP_DIR/foo"
+ 	mx --primary-suite-path substratevm build
 }
 
 debug_graal() {
@@ -61,12 +61,8 @@ debug_graal() {
 }
 
 download_graal() {
-	clone_or_update https://github.com/oracle/graal.git "$GRAAL_DIR"
-}
-
-make_foo() {
-	echo "class Foo { public static void main(String[] args) { System.out.println(\"Hello, world\"); } }" >"$TMP_DIR/Foo.java"
-	$JAVA_HOME/bin/javac -classpath "$TMP_DIR" "$TMP_DIR/Foo.java"
+	clone_or_update $GRAAL_SOURCE_URL "$GRAAL_DIR"
+	cd "$GRAAL_DIR"
 }
 
 test_graal() {
@@ -102,10 +98,9 @@ echo Using JAVA_HOME=$JAVA_HOME
 export PATH="$JAVA_HOME/bin:$PATH"
 
 download_graal
-clean_graal
+#clean_graal
 build_graal
-
-export GRAALVM_HOME="$GRAAL_DIR/vm/mxbuild/darwin-amd64/GRAALVM_SVM_BGU/graalvm-svm-19.3.0-dev"
+export GRAALVM_HOME="$GRAAL_DIR/sdk/mxbuild/darwin-amd64/GRAALVM_UNKNOWN_JAVA8/graalvm-unknown-java8-20.1.0-dev/Contents/Home"
 
 test_graal
 
